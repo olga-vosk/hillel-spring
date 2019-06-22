@@ -7,11 +7,9 @@
  */
 
 plugins {
-    // Apply the java plugin to add support for Java
     id 'java'
-
-    // Apply the application plugin to add support for building an application
     id 'application'
+    id "io.freefair.lombok" version "3.7.5"
 }
 
 repositories {
@@ -21,11 +19,10 @@ repositories {
 }
 
 dependencies {
-    // This dependency is found on compile classpath of this component and consumers.
-    implementation 'com.google.guava:guava:27.0.1-jre'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+    testCompile("org.assertj:assertj-core:3.11.1")
 }
 
 // Define the main class for the application
