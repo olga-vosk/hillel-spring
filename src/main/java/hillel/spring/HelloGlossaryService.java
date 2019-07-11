@@ -4,6 +4,7 @@ package hillel.spring;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -12,16 +13,16 @@ class HelloGlossaryService {
     private final HelloGlossaryRepo helloGlossaryRepo;
     private final Random random;
 
-    String findHello(String lang ){
+    public String findHello(String lang ){
         if ("random".compareToIgnoreCase(lang) == 0){
-            lang = getRandomLang(random);
+            lang = generateRandomLang();
         }
         return helloGlossaryRepo.findHello(lang);
     }
 
-    String getRandomLang(Random random){
-        String[] languages = helloGlossaryRepo.getLanguages();
-        int randomIndex  = random.nextInt(languages.length);
-        return languages[randomIndex];
+    public String generateRandomLang(){
+        List<String> languages = helloGlossaryRepo.getLanguages();
+        int randomIndex  = random.nextInt(languages.size());
+        return languages.get(randomIndex);
     }
 }

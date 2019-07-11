@@ -14,7 +14,7 @@ public class Application {
 	}
 
 	@Bean
-	public Random getRandom(){
+	public Random generateRandom(){
 		return new Random();
 	}
 }

@@ -3,6 +3,8 @@ package hillel.spring;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -14,11 +16,10 @@ class HelloGlossaryRepo {
 
 
     String findHello(String lang){
-        lang = lang.toLowerCase();
-        return repo.getOrDefault(lang, lang + " language not supported!");
+        return repo.getOrDefault(lang.toLowerCase(), lang + " language not supported!");
     }
 
-    String[] getLanguages() {
-        return repo.keySet().toArray(new String[0]);
+    List<String> getLanguages() {
+        return new ArrayList<>(repo.keySet());
     }
 }
