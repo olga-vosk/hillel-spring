@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Tom",
+    "breed": "Cat",
+    "age": 2,
+    "owner": {
+      "name": "Vasya"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Jerry",
+    "breed": "Mouse",
+    "age": 1,
+    "owner": {
+      "name": "Petya"
+    }
+  }
+]

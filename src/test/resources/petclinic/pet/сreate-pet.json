@@ -1,0 +1,9 @@
+{
+  "id": 3,
+  "name": "Donald",
+  "breed": "Duck",
+  "age": 1,
+  "owner": {
+    "name": "Ivan"
+  }
+}

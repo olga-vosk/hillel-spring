@@ -4,58 +4,37 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class PetRepository {
-    private final List<Pet> pets = new ArrayList<>();
+    private final Map<Integer, Pet> idToPet = new ConcurrentHashMap<>();
 
-    {
-        pets.add(new Pet(1, "Tom", "Cat", 2, new Owner("Vasya")));
-        pets.add(new Pet(2, "Jerry", "Mouse", 1, new Owner("Petya")));
-    }
 
     public List<Pet> findAll(){
-        return pets;
+        return new ArrayList<>(idToPet.values());
     }
 
     public Optional<Pet> findById(Integer id){
-        return pets.stream()
-                .filter(it->it.getId().equals(id))
-                .findFirst();
+        return Optional.ofNullable(idToPet.get(id));
     }
 
     public void create(Pet pet) {
-        pets.add(pet);
+        idToPet.put(pet.getId(), pet);
     }
 
     public void update(Pet pet) {
-        findIndex(pet).ifPresentOrElse(idx->pets.set(idx, pet),
-                ()->{throw new NoSuchPetException();});
-
+        idToPet.replace(pet.getId(), pet);
     }
 
-    private Optional<Integer> findIndex(Pet pet){
-        for (int i = 0; i < pets.size(); i++ ){
-            if (pets.get(i).getId().equals(pet.getId())){
-                return Optional.of(i);
-            }
-        }
-        return Optional.empty();
-    }
 
     public void delete(Integer id) {
-        findIndexById(id).ifPresentOrElse(idx->pets.remove(idx.intValue()),
-                ()->{throw new NoSuchPetException();});
+        idToPet.remove(id);
     }
 
-    private Optional<Integer> findIndexById(Integer id) {
-        for (int i = 0; i < pets.size(); i++ ){
-            if (pets.get(i).getId().equals(id)){
-                return Optional.of(i);
-            }
-        }
-        return Optional.empty();
+    public void deleteAll() {
+        idToPet.clear();
     }
-
 }
