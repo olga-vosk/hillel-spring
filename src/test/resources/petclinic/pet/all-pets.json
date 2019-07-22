@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+
     "name": "Tom",
     "breed": "Cat",
     "age": 2,
@@ -9,7 +9,7 @@
     }
   },
   {
-    "id": 2,
+
     "name": "Jerry",
     "breed": "Mouse",
     "age": 1,

@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class PetRepository {
     private final Map<Integer, Pet> idToPet = new ConcurrentHashMap<>();
-
+    private final AtomicInteger counter = new AtomicInteger();
+    
 
     public List<Pet> findAll(){
         return new ArrayList<>(idToPet.values());
@@ -21,8 +23,10 @@ public class PetRepository {
         return Optional.ofNullable(idToPet.get(id));
     }
 
-    public void create(Pet pet) {
-        idToPet.put(pet.getId(), pet);
+    public Pet create(Pet pet) {
+        Pet created = pet.toBuilder().id(counter.incrementAndGet()).build();
+        idToPet.put(created.getId(), created);
+        return created;
     }
 
     public void update(Pet pet) {

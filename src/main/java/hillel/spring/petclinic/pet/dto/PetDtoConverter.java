@@ -11,4 +11,6 @@ public interface PetDtoConverter {
     @Mapping(target = "id", ignore = true)
     Pet toModel(PetInputDto dto);
 
+
+    Pet toModel(PetInputDto dto, Integer id);
 }

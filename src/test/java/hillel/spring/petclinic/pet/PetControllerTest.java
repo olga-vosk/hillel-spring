@@ -1,23 +1,21 @@
 package hillel.spring.petclinic.pet;
 
+import java.io.File;
+import java.nio.file.Files;
 
-import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.nio.file.Files;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,66 +31,68 @@ public class PetControllerTest {
     PetRepository repository;
 
     @After
-    public void cleanup(){
+    public void cleanup() {
         repository.deleteAll();
     }
 
-    private void init(){
-        repository.create(new Pet(1, "Tom", "Cat", 2, new Owner("Vasya")));
-        repository.create(new Pet(2, "Jerry", "Mouse", 1, new Owner("Petya")));
-
-    }
-
     @Test
-    public void shouldCreatePet() throws Exception{
-        mockMvc.perform(post("/pets")
+    public void shouldCreatePet() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(post("/pets")
                 .contentType("application/json")
                 .content(fromResource("petclinic/pet/create-pet.json"))
         )
                 .andExpect(status().isCreated())
-                .andExpect(header().string("location", "http://localhost/pets/3"));
-        Assertions.assertThat(repository.findById(3).isPresent());
+                .andExpect(header().string("location", containsString("http://localhost/pets/")))
+                .andReturn().getResponse();
+
+        Integer id = Integer.parseInt(response.getHeader("location")
+                .replace("http://localhost/pets/", ""));
+
+        assertThat(repository.findById(id)).isPresent();
     }
 
     @Test
-    public void shouldUpdateTom() throws Exception{
-        init();
+    public void shouldUpdateTom() throws Exception {
 
-        mockMvc.perform(put("pets/{id}", 1)
-        .contentType("application/json")
+        Integer id = repository.create(new Pet(null, "Tom", "Cat", 2, new Owner("Vasya"))).getId();
+
+        mockMvc.perform(put("/pets/{id}", id)
+                .contentType("application/json")
                 .content(fromResource("petclinic/pet/update-pet.json")))
-        .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
-        Assertions.assertThat(repository.findById(1).get().getAge()).isEqualTo(3);
+        assertThat(repository.findById(id).get().getAge()).isEqualTo(3);
     }
 
     @Test
-    public void shouldDeleteJerry() throws Exception{
-        init();
+    public void shouldDeleteJerry() throws Exception {
+        repository.create(new Pet(null, "Tom", "Cat", 2, new Owner("Vasya")));
+        repository.create(new Pet(null, "Jerry", "Mouse", 1, new Owner("Petya")));
 
-        mockMvc.perform(delete("pets/{id}", 2))
+        mockMvc.perform(delete("/pets/{id}", 2))
                 .andExpect(status().isNoContent());
 
-
+        assertThat(repository.findById(2)).isEmpty();
     }
 
     @Test
-    public void shouldFindAllPets() throws Exception{
-        init();
-        // лучше repository.create(new Pet(....))
+    public void shouldFindAllPets() throws Exception {
+        repository.create(new Pet(null, "Tom", "Cat", 2, new Owner("Vasya")));
+        repository.create(new Pet(null, "Jerry", "Mouse", 1, new Owner("Petya")));
+
         mockMvc.perform(get("/pets"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(fromResource("petclinic/pet/all-pets.json")))
-                .andExpect(jsonPath("$", Matchers.hasSize(2)))
+                .andExpect(content().json(fromResource("petclinic/pet/all-pets.json"), false))
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].owner.name", is("Vasya")))
-        ;
-        //.andExpect(MockMvcResultMatchers.jsonPath("$"))
-
+                .andExpect(jsonPath("$[0].id", notNullValue()))
+                .andExpect(jsonPath("$[1].id", notNullValue()));
     }
 
     @Test
-    public void shouldReturnTom() throws Exception{
-        init();
+    public void shouldReturnTom() throws Exception {
+        repository.create(new Pet(null, "Tom", "Cat", 2, new Owner("Vasya")));
+        repository.create(new Pet(null, "Jerry", "Mouse", 1, new Owner("Petya")));
 
         mockMvc.perform(get("/pets").param("name", "Tom"))
                 .andExpect(status().isOk())
@@ -100,10 +100,10 @@ public class PetControllerTest {
                 .andExpect(jsonPath("$[0].name", is("Tom")));
     }
 
-
     @Test
-    public void shouldReturnJerry() throws Exception{
-        init();
+    public void shouldReturnJerry() throws Exception {
+        repository.create(new Pet(null, "Tom", "Cat", 2, new Owner("Vasya")));
+        repository.create(new Pet(null, "Jerry", "Mouse", 1, new Owner("Petya")));
 
         mockMvc.perform(get("/pets")
                 .param("name", "Jerry")
@@ -111,11 +111,10 @@ public class PetControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name", is("Jerry")))
-                .andExpect(jsonPath("$[0].age", is(1))
-                );
+                .andExpect(jsonPath("$[0].age", is(1)));
     }
 
-    public String fromResource(String path){
+    public String fromResource(String path) {
         try {
             File file = ResourceUtils.getFile("classpath:" + path);
             return Files.readString(file.toPath());

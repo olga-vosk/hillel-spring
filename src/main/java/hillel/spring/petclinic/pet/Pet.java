@@ -1,12 +1,14 @@
 package hillel.spring.petclinic.pet;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
 public class Pet {
     private Integer id;
     private String name;

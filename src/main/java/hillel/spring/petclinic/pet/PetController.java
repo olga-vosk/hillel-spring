@@ -59,20 +59,15 @@ public class PetController {
 
     @PostMapping("/pets")
     public ResponseEntity<?> createPet(@RequestBody PetInputDto dto){
-        Pet pet = dtoConverter.toModel(dto);
-        pet.setId(22);
-        petService.createPet(pet);
-        val uri = uriBuilder.build(pet.getId());
-        return ResponseEntity.created(uri).build();
+
+        val created = petService.createPet(dtoConverter.toModel(dto));
+        return ResponseEntity.created(uriBuilder.build(created.getId())).build();
     }
 
     @PutMapping("/pets/{id}")
-    public ResponseEntity<?> updatePet(@RequestBody Pet pet,
+    public ResponseEntity<?> updatePet(@RequestBody PetInputDto dto,
                                        @PathVariable Integer id){
-
-        if (!pet.getId().equals(id)){
-            throw  new IdMismatchException();
-        }
+        val pet = dtoConverter.toModel(dto, id);
         petService.update(pet);
         return ResponseEntity.ok().build();
 
