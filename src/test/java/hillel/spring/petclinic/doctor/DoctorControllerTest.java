@@ -159,7 +159,7 @@ public class DoctorControllerTest {
     }
 
     
-
+    @Test
     public void shouldDeleteDoctor() throws Exception{
         repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
         Integer id = repository.create(new Doctor(2, "Petr Petrov", "surgeon")).getId();
@@ -171,6 +171,7 @@ public class DoctorControllerTest {
     }
 
 
+    @Test
     public void shouldNotDeleteDoctor() throws Exception{
         repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
         repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
