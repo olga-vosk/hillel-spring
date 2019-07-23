@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -21,11 +23,6 @@ public class DoctorService {
         return doctorRepository.findById(id);
     }
 
-    public Collection<Doctor> findAll(){
-        return doctorRepository.findAll();
-    }
-
-
     public void update(Doctor doctor){
         doctorRepository.update(doctor);
     }
@@ -34,12 +31,12 @@ public class DoctorService {
         return doctorRepository.delete(id);
     }
 
-    public Collection<Doctor> findBySpec(String specialization) {
-        return doctorRepository.findBySpec(specialization);
-    }
 
-    public Collection<Doctor> findByName(String name) {
-        return doctorRepository.findByName(name);
+    public Collection<Doctor> findAll(Predicate<Doctor> predicate){
+        return doctorRepository.findAll()
+                .stream()
+                .filter(predicate)
+                .collect(Collectors.toList());
     }
 
 }

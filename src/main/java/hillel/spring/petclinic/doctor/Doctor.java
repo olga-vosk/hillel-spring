@@ -10,13 +10,8 @@ import lombok.NoArgsConstructor;
 public class Doctor {
 
     private Integer id;
-
     private String name;
-
     private String specialization;
 
-    public void copy(Doctor anotherDoctor){
-        setName(anotherDoctor.getName());
-        setSpecialization(anotherDoctor.getSpecialization());
-    }
+
 }
