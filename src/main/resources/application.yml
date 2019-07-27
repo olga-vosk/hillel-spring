@@ -1,0 +1,7 @@
+server.port : 80
+pet-clinic:
+  host-name: my-pet.com
+  name: Aibolit
+  working-hours:
+      start:  8AM
+      end: 5PM
