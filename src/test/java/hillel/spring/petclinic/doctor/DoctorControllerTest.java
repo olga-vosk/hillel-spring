@@ -54,8 +54,8 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldFindAllDoctors() throws Exception {
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
 
         mockMvc.perform(get("/doctors"))
                 .andExpect(status().isOk())
@@ -70,18 +70,18 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldFindDoctorById() throws Exception {
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        Integer id = repository.save(new Doctor(2, "Petr Petrov", "surgeon")).getId();
 
-        mockMvc.perform(get("/doctors/{id}", 2))
+        mockMvc.perform(get("/doctors/{id}", id))
                 .andExpect(jsonPath("$.name", is("Petr Petrov")))
                 .andExpect(jsonPath("$.specialization", is("surgeon")));
     }
 
     @Test
     public void shouldNotFindDoctorById() throws Exception {
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
 
         mockMvc.perform(get("/doctors/{id}", 3))
                 .andExpect(status().isNotFound());
@@ -89,10 +89,10 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldFindAllSurgeons() throws Exception{
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
-        repository.create(new Doctor(3, "Ivan Petrov", "surgeon"));
-        repository.create(new Doctor(4, "Petr Ivanov", "veterinarian"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(3, "Ivan Petrov", "surgeon"));
+        repository.save(new Doctor(4, "Petr Ivanov", "veterinarian"));
 
         mockMvc.perform(get("/doctors")
                 .param("specialization", "surgeon"))
@@ -105,10 +105,10 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldFindAllPetrs() throws Exception {
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
-        repository.create(new Doctor(3, "Ivan Petrov", "surgeon"));
-        repository.create(new Doctor(4, "Petr Ivanov", "veterinarian"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(3, "Ivan Petrov", "surgeon"));
+        repository.save(new Doctor(4, "Petr Ivanov", "veterinarian"));
 
         mockMvc.perform(get("/doctors")
                 .param("name", "Petr"))
@@ -121,10 +121,10 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldFindPetrSurgeon() throws Exception {
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
-        repository.create(new Doctor(3, "Ivan Petrov", "surgeon"));
-        repository.create(new Doctor(4, "Petr Ivanov", "veterinarian"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(3, "Ivan Petrov", "surgeon"));
+        repository.save(new Doctor(4, "Petr Ivanov", "veterinarian"));
 
         mockMvc.perform(get("/doctors")
                 .param("specialization", "surgeon")
@@ -137,7 +137,7 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldUpdateDoctor() throws Exception{
-        Integer id = repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
+        Integer id = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
 
         mockMvc.perform(put("/doctors/{id}", id)
                         .contentType("application/json")
@@ -149,7 +149,7 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldNotFindDoctorForUpdate() throws Exception{
-       repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+       repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
 
         mockMvc.perform(put("/doctors/{id}", 3000)
                 .contentType("application/json")
@@ -161,8 +161,8 @@ public class DoctorControllerTest {
     
     @Test
     public void shouldDeleteDoctor() throws Exception{
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        Integer id = repository.create(new Doctor(2, "Petr Petrov", "surgeon")).getId();
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        Integer id = repository.save(new Doctor(2, "Petr Petrov", "surgeon")).getId();
 
         mockMvc.perform(delete("/doctors/{id}", id))
                 .andExpect(status().isNoContent());
@@ -173,13 +173,79 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldNotDeleteDoctor() throws Exception{
-        repository.create(new Doctor(1, "Ivan Ivanov", "veterinarian"));
-        repository.create(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
 
         mockMvc.perform(delete("/doctors/{id}", 1000))
                 .andExpect(status().isNotFound());
 
     }
+
+
+    @Test
+    public void shouldCheckSpecialization() throws Exception{
+
+        mockMvc.perform(post("/doctors")
+                .contentType("application/json")
+                .content(fromResource("petclinic/doctor/wrong-spec-doctor.json"))
+        )
+                .andExpect(status().isBadRequest())
+                ;
+
+        assertThat(repository.findAll()).isEmpty();
+    }
+
+    @Test
+    public void shouldFindByNameRegardlessRegister() throws Exception{
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(3, "Ivan Petrov", "surgeon"));
+        repository.save(new Doctor(4, "pEtR Ivanov", "veterinarian"));
+
+        mockMvc.perform(get("/doctors")
+                .param("name", "PETR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    public void shouldFindByNameAndSpecializationRegardlessRegister() throws Exception{
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(3, "Ivan Petrov", "surgeon"));
+        repository.save(new Doctor(4, "pEtR Ivanov", "veterinarian"));
+
+        mockMvc.perform(get("/doctors")
+                .param("name", "PETR")
+                .param("specialization", "surgeon"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name", is("Petr Petrov")))
+                .andExpect(jsonPath("$[0].specialization", is("surgeon")));
+    }
+
+    @Test
+    public void shouldFindByMultipleSpecializations() throws Exception{
+        repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
+        repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
+        repository.save(new Doctor(3, "Ivan Petrov", "therapeutist"));
+        repository.save(new Doctor(4, "pEtR Ivanov", "veterinarian"));
+
+        mockMvc.perform(get("/doctors")
+                .param("specialization", "surgeon", "veterinarian"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        mockMvc.perform(get("/doctors")
+                .param("specialization", "surgeon", "veterinarian")
+                .param("name", "i"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name", is("Ivan Ivanov")))
+                .andExpect(jsonPath("$[0].specialization", is("veterinarian")));
+
+    }
+
 
 
     public String fromResource(String path) {

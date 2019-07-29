@@ -46,7 +46,7 @@ public class PetControllerTest {
                 .andReturn().getResponse();
 
         Integer id = Integer.parseInt(response.getHeader("location")
-                .replace("http://localhost/pets/", ""));
+                .replace("http://my-pet.com/pets/", ""));
 
         assertThat(repository.findById(id)).isPresent();
     }
