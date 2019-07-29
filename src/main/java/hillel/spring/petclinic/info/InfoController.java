@@ -1,5 +1,6 @@
 package hillel.spring.petclinic.info;
 
+import hillel.spring.petclinic.WorkingHoursConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -7,15 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class InfoController {
     private final String clinicName;
-    private final String start;
-    private final String end;
+    private final WorkingHoursConfig workingHoursConfig;
 
     public InfoController(@Value("${pet-clinic.name}") String clinicName,
-                          @Value("${pet-clinic.working-hours.start}") String start,
-                          @Value("${pet-clinic.working-hours.end}") String  end) {
+                          WorkingHoursConfig workingHoursConfig){
         this.clinicName = clinicName;
-        this.start = start;
-        this.end = end;
+        this.workingHoursConfig = workingHoursConfig;
     }
 
     @GetMapping("/clinic-name")
@@ -25,6 +23,6 @@ public class InfoController {
 
     @GetMapping("/working-time")
     public String getWorkingTime(){
-        return start + " - " + end;
+        return workingHoursConfig.getStart() + " - " + workingHoursConfig.getEnd();
     }
 }

@@ -46,16 +46,9 @@ public class PetController {
     @GetMapping("/pets")
     public List<Pet> findAll(@RequestParam Optional<String> name,
                              @RequestParam Optional<Integer> age){
-        Optional<Predicate<Pet>> maybeNamePredicate = name.map(this::filterByName);
-        Optional<Predicate<Pet>> maybeAgePredicate = age.map(this::filterByAge);
 
-        Predicate<Pet> predicate =
-                Stream.of(maybeNamePredicate, maybeAgePredicate)
-                .flatMap(Optional::stream)
-                .reduce(Predicate::and)
-                .orElse(pet -> true);
 
-        return petService.findAll(predicate);
+        return petService.findAll(name, age);
     }
 
     private Predicate<Pet> filterByName(String name){

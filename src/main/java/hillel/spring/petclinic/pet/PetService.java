@@ -17,23 +17,29 @@ public class PetService {
         return petRepository.findById(id);
     }
 
-    public List<Pet> findAll(Predicate<Pet> predicate){
-        return petRepository.findAll()
-                .stream()
-                .filter(predicate)
-                .collect(Collectors.toList());
+    public List<Pet> findAll(Optional<String> name, Optional<Integer> age){
+        if (name.isPresent() && age.isPresent()){
+            return petRepository.findByNameAndAge(name.get(), age.get());
+        }
+        if (name.isPresent()) {
+            return petRepository.findByName(name.get());
+        }
+        if (age.isPresent()){
+            return petRepository.findByAge(age.get());
+        }
+        return petRepository.findAll();
     }
 
     public Pet createPet(Pet pet) {
-        return petRepository.create(pet);
+        return petRepository.save(pet);
     }
 
     public void update(Pet pet){
-        petRepository.update(pet);
+        petRepository.save(pet);
     }
 
     public void delete(Integer id) {
-         petRepository.delete(id);
+         petRepository.deleteById(id);
     }
 
 }

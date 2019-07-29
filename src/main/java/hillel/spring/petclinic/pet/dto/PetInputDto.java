@@ -8,5 +8,5 @@ public class PetInputDto {
     private final String name;
     private final String breed;
     private final Integer age;
-    private final Owner owner;
+    private final String owner;
 }
