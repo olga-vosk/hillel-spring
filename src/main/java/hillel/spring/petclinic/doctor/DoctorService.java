@@ -2,7 +2,9 @@
 package hillel.spring.petclinic.doctor;
 
 
-import lombok.AllArgsConstructor;
+
+import org.mapstruct.ap.internal.util.Collections;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -11,10 +13,15 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-@AllArgsConstructor
 public class DoctorService {
-    private static final Set<String> SPECIALIZATIONS = Set.of("surgeon", "veterinarian", "therapeutist");
+    private final Set<String> specializations;
     private final DoctorRepository doctorRepository;
+
+    public DoctorService(@Value("${pet-clinic.doctors-specializations}") String[] specializations,
+                         DoctorRepository doctorRepository) {
+        this.specializations = Collections.asSet(specializations);
+        this.doctorRepository = doctorRepository;
+    }
 
     public Doctor createDoctor(Doctor doctor) {
         checkSpecialization(doctor);
@@ -44,19 +51,19 @@ public class DoctorService {
 
     public Collection<Doctor> findAll(Optional<List<String>> specialization, Optional<String> name){
         if (specialization.isPresent() && name.isPresent()){
-            return doctorRepository.findBySpecializationAndName(specialization.get(), name.get());
+            return doctorRepository.findBySpecializationInAndNameIgnoreCaseStartingWith(specialization.get(), name.get());
         }
         if (specialization.isPresent()){
-            return doctorRepository.findBySpecialization(specialization.get());
+            return doctorRepository.findBySpecializationIn(specialization.get());
         }
         if (name.isPresent()){
-            return doctorRepository.findByName(name.get());
+            return doctorRepository.findByNameIgnoreCaseStartingWith(name.get());
         }
         return doctorRepository.findAll();
     }
 
     private void checkSpecialization(Doctor doctor) {
-        if (!SPECIALIZATIONS.contains(doctor.getSpecialization()))
+        if (!specializations.contains(doctor.getSpecialization()))
             throw new InvalidSpecializationException();
     }
 
