@@ -5,3 +5,8 @@ pet-clinic:
   working-hours:
       start:  8AM
       end: 5PM
+  doctors-specializations:  surgeon, veterinarian, therapeutist
+spring:
+  h2:
+    console:
+      enabled: true;

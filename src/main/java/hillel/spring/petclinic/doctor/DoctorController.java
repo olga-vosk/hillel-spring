@@ -12,9 +12,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 
 @RestController
@@ -42,17 +42,9 @@ public class DoctorController {
     }
 
     @GetMapping("/doctors")
-    public Collection<Doctor> findAll(@RequestParam Optional<String> specialization,
+    public Collection<Doctor> findAll(@RequestParam Optional<List<String>> specialization,
                                       @RequestParam Optional<String> name){
-        Optional<Predicate<Doctor>>  maybeSpecializationPredicate =  specialization.map(this::bySpecialization);
-        Optional<Predicate<Doctor>>  maybeNamePredicate = name.map(this::byName);
-
-        Predicate<Doctor> predicate = Stream.of(maybeSpecializationPredicate, maybeNamePredicate)
-                .flatMap(Optional::stream)
-                .reduce(Predicate::and)
-                .orElse(pet -> true);
-
-        return doctorService.findAll(predicate);
+        return doctorService.findAll(specialization, name);
     }
 
     private Predicate<Doctor> bySpecialization(String specialization){
@@ -82,5 +74,11 @@ public class DoctorController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void noSuchDoctor(NoSuchDoctorException ex){
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void invalidSpecialization(InvalidSpecializationException ex){
+    }
+
 
 }
