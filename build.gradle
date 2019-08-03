@@ -29,8 +29,9 @@ dependencies {
 
 	compile 'org.mapstruct:mapstruct:1.3.0.Final'
 	
-	runtimeOnly 'com.h2database:h2'
-
+	//runtimeOnly 'com.h2database:h2'
+     runtimeOnly 'org.postgresql:postgresql' +
+			 ''
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.3.0.Final'

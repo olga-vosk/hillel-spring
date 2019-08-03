@@ -7,6 +7,18 @@ pet-clinic:
       end: 5PM
   doctors-specializations:  surgeon, veterinarian, therapeutist
 spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:posgresql://localhost:5432/posgresql
+    username: postgres
+    password: postgres
   h2:
     console:
-      enabled: true;
+      enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+logging:
+  level:
+    sql : true
