@@ -2,15 +2,10 @@
 package hillel.spring.petclinic.doctor;
 
 
-
-import org.mapstruct.ap.internal.util.Collections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class DoctorService {
@@ -19,7 +14,7 @@ public class DoctorService {
 
     public DoctorService(@Value("${pet-clinic.doctors-specializations}") String[] specializations,
                          DoctorRepository doctorRepository) {
-        this.specializations = Collections.asSet(specializations);
+        this.specializations = asSet(specializations);
         this.doctorRepository = doctorRepository;
     }
 
@@ -66,5 +61,12 @@ public class DoctorService {
         if (!specializations.contains(doctor.getSpecialization()))
             throw new InvalidSpecializationException();
     }
+
+    private static <T> Set<T> asSet(T... elements) {
+        Set<T> set = new HashSet<>( elements.length );
+        java.util.Collections.addAll( set, elements );
+        return set;
+    }
+
 
 }

@@ -9,7 +9,7 @@ pet-clinic:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:posgresql://localhost:5432/posgresql
+    url: jdbc:postgresql://192.168.99.100:5432/postgres
     username: postgres
     password: postgres
   h2:
