@@ -2,19 +2,21 @@ package hillel.spring.petclinic.doctor;
 
 import hillel.spring.petclinic.doctor.dto.DoctorDtoConverter;
 import hillel.spring.petclinic.doctor.dto.DoctorInputDto;
+import hillel.spring.petclinic.pet.NoSuchPetException;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.mapstruct.factory.Mappers;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 
 @RestController
@@ -34,6 +36,16 @@ public class DoctorController {
         return ResponseEntity.created(uriBuilder.build(created.getId())).build();
     }
 
+    @PostMapping("/doctors/{doctorId}/schedule/{date}/{hour}")
+    public ResponseEntity<?> schedulePetToDoctor(@PathVariable Integer doctorId,
+                                                 @PathVariable
+                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                                 @PathVariable Integer hour,
+                                                 @RequestBody PetId petId){
+        doctorService.schedulePetToDoctor(doctorId, date, hour, petId.getPetId());
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/doctors/{id}")
     public Doctor findById(@PathVariable Integer id){
         val mayBeDoctor = doctorService.findById(id);
@@ -41,18 +53,17 @@ public class DoctorController {
         return mayBeDoctor.orElseThrow(DoctorNotFoundException::new);
     }
 
+    @GetMapping("/doctors/{doctorId}/schedule/{date}")
+    public Schedule findSchedule(@PathVariable Integer doctorId,
+                                 @PathVariable
+                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+        return doctorService.findSchedule(doctorId, date);
+    }
+
     @GetMapping("/doctors")
     public Collection<Doctor> findAll(@RequestParam Optional<List<String>> specialization,
                                       @RequestParam Optional<String> name){
         return doctorService.findAll(specialization, name);
-    }
-
-    private Predicate<Doctor> bySpecialization(String specialization){
-        return doctor -> doctor.getSpecialization().compareToIgnoreCase(specialization) == 0;
-    }
-
-    private Predicate<Doctor> byName(String name){
-        return doctor -> doctor.getName().startsWith(name);
     }
 
 
@@ -80,5 +91,19 @@ public class DoctorController {
     public void invalidSpecialization(InvalidSpecializationException ex){
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void scheduleHourAlreadyBusy(ScheduleHourAlreadyBusy ex){
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void invalidHour(InvalidHourException ex){
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void noSuchPet(NoSuchPetException ex){
+    }
 
 }

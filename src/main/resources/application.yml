@@ -19,6 +19,11 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: create
+    properties:
+            hibernate:
+              jdbc:
+                lob:
+                  non_contextual_creation: true
 logging:
   level:
     sql : true
