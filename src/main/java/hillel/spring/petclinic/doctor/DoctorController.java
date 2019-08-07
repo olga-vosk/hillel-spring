@@ -57,7 +57,7 @@ public class DoctorController {
     public Schedule findSchedule(@PathVariable Integer doctorId,
                                  @PathVariable
                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
-        return doctorService.findSchedule(doctorId, date);
+        return doctorService.findOrCreateSchedule(doctorId, date);
     }
 
     @GetMapping("/doctors")

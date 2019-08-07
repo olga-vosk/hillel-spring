@@ -39,8 +39,9 @@ public class DoctorService {
         checkSpecialization(doctor);
         if (doctorRepository.existsById(doctor.getId()))
             doctorRepository.save(doctor);
-        else
+        else {
             throw new NoSuchDoctorException();
+        }
     }
 
     public boolean delete(Integer id) {
@@ -67,10 +68,12 @@ public class DoctorService {
 
     private void checkSpecialization(Doctor doctor) {
         Optional<String> maybeInvalid = doctor.getSpecialization().stream()
-                .filter(s -> !specializations.contains(s)).findFirst();
+                .filter(s -> !specializations.contains(s))
+                .findFirst();
 
-        if (maybeInvalid.isPresent())
-            throw new InvalidSpecializationException(maybeInvalid.get(), specializations);
+        if (maybeInvalid.isPresent()) {
+            throw new InvalidSpecializationException(maybeInvalid.get());
+        }
     }
 
     private static <T> Set<T> asSet(T... elements) {
@@ -79,22 +82,42 @@ public class DoctorService {
         return set;
     }
 
+    public Schedule findOrCreateSchedule(Doctor doctor, LocalDate date) {
+        Schedule schedule = doctor.getScheduleToDate().get(date);
+        if (schedule == null){
+            schedule = new Schedule();
+            doctor.getScheduleToDate().put(date, schedule);
+        }
+        return schedule;
+    }
 
-    public Schedule findSchedule(Integer doctorId, LocalDate date) {
+    public Schedule findOrCreateSchedule(Integer doctorId, LocalDate date) {
         val mayBeDoctor = findById(doctorId);
         Doctor doctor =  mayBeDoctor.orElseThrow(NoSuchDoctorException::new);
-        return doctor.findSchedule(date);
+        return findOrCreateSchedule(doctor, date);
     }
 
     public void schedulePetToDoctor(Integer doctorId, LocalDate date, Integer hour, Integer petId){
         val mayBeDoctor = findById(doctorId);
         Doctor doctor =  mayBeDoctor.orElseThrow(NoSuchDoctorException::new);
-        Schedule schedule = doctor.findSchedule(date);
+        Schedule schedule = findOrCreateSchedule(doctor, date);
         Optional<Pet> maybePet = petService.findById(petId);
         if (maybePet.isPresent()) {
-            schedule.putToSchedule(hour, petId);
+            putToSchedule(schedule, hour, petId);
             doctorRepository.save(doctor);
-        } else
+        } else {
             throw new NoSuchPetException();
+        }
+    }
+
+
+    public void putToSchedule(Schedule schedule, Integer hour, Integer petId){
+        if ( hour < 8 || hour > 8 + 8)
+            throw new InvalidHourException(hour);
+        if (schedule.getHourToPetId().containsKey(hour)) {
+            throw new ScheduleHourAlreadyBusy(hour);
+        } else {
+            schedule.getHourToPetId().put(hour, petId);
+        }
     }
 }

@@ -37,12 +37,5 @@ public class Doctor {
     }
 
 
-    public Schedule findSchedule(LocalDate date) {
-        Schedule schedule = scheduleToDate.get(date);
-        if (schedule == null){
-             schedule = new Schedule();
-             scheduleToDate.put(date, schedule);
-        }
-        return schedule;
-    }
+
 }

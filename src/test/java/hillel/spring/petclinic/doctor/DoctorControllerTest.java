@@ -38,6 +38,9 @@ public class DoctorControllerTest {
     @Autowired
     PetRepository petRepository;
 
+    @Autowired
+    DoctorService doctorService;
+
     @After
     public void cleanup() {
         repository.deleteAll();
@@ -280,7 +283,7 @@ public class DoctorControllerTest {
         Doctor doctor = repository.findById(doctorId).get();
         LocalDate localDate = LocalDate.of(2010, 01, 01);
         Schedule schedule = new Schedule();
-        schedule.putToSchedule(10, petId);
+        doctorService.putToSchedule(schedule, 10, petId);
         doctor.getScheduleToDate().put(localDate, schedule);
         repository.save(doctor);
 

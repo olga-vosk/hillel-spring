@@ -18,12 +18,5 @@ public class Schedule {
     private Map<Integer, Integer> hourToPetId = new HashMap<>();
 
 
-    public void putToSchedule(Integer hour, Integer petId){
-        if ( hour < 8 || hour > 8 + 8)
-            throw new InvalidHourException(hour);
-        if (hourToPetId.containsKey(hour))
-            throw new ScheduleHourAlreadyBusy(hour);
-        else
-            hourToPetId.put(hour, petId);
-    }
+
 }
