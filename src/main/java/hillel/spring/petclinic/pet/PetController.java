@@ -4,6 +4,7 @@ import hillel.spring.petclinic.pet.dto.PetDtoConverter;
 import hillel.spring.petclinic.pet.dto.PetInputDto;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import org.hibernate.StaleObjectStateException;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -72,8 +73,21 @@ public class PetController {
         val pet = dtoConverter.toModel(dto, id);
         petService.update(pet);
         return ResponseEntity.ok().build();
+    }
 
+    @PostMapping("/pets/swap-wners/{firstPetId}/{secondPetId}")
+    public void swapOwners(@PathVariable Integer firstPetId,
+                           @PathVariable Integer secondPetId) {
+        petService.swapOwners(firstPetId, secondPetId);
+    }
 
+    @PatchMapping("/pets/{id}")
+    @Retryable(StaleObjectStateException.class)
+    public void patchPet(@RequestBody PetInputDto dto,
+                         @PathVariable Integer id){
+        val pet = petService.findById(id).get();
+        dtoConverter.update(pet, dto);
+        petService.save(pet);
     }
 
     @DeleteMapping("pets/{id}")

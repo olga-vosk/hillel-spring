@@ -1,8 +1,10 @@
 package hillel.spring.petclinic.pet;
 
 import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -38,8 +40,25 @@ public class PetService {
         petRepository.save(pet);
     }
 
+    public void save(Pet pet){
+        petRepository.save(pet);
+    }
+
     public void delete(Integer id) {
          petRepository.deleteById(id);
     }
 
+    @Transactional
+    public void swapOwners(Integer firstPetId, Integer secondPetId)  {
+        val firstPet = petRepository.findById(firstPetId).get();
+        val secondPet = petRepository.findById(secondPetId).get();
+
+        val firstOwner = firstPet.getOwner();
+        firstPet.setOwner(secondPet.getOwner());
+        secondPet.setOwner(firstOwner);
+
+        petRepository.save(firstPet);
+        petRepository.save(secondPet);
+    }
 }
+
