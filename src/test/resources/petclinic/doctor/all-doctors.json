@@ -1,10 +1,10 @@
 [
   {
     "name": "Ivan Ivanov",
-    "specialization": "veterinarian"
+    "specialization": ["veterinarian"]
   },
   {
     "name": "Petr Petrov",
-    "specialization": "surgeon"
+    "specialization": ["surgeon"]
   }
 ]

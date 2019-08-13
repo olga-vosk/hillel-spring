@@ -1,23 +1,41 @@
 package hillel.spring.petclinic.doctor;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 public class Doctor {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private String specialization;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> specialization;
+    
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Map<LocalDate, Schedule> scheduleToDate;
+
+    public Doctor(Integer id, String name, List<String> specialization) {
+        this.id = id;
+        this.name = name;
+        this.specialization = specialization;
+    }
+
+
+    public Doctor(Integer id, String name, String... specialization) {
+        this.id = id;
+        this.name = name;
+        this.specialization = Arrays.asList(specialization);
+    }
+
 
 
 }

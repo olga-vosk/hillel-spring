@@ -2,9 +2,11 @@ package hillel.spring.petclinic.doctor.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DoctorInputDto {
     private final String name;
-    private final String specialization;
+    private final List<String> specialization;
 
 }
