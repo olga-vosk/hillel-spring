@@ -33,7 +33,7 @@ create table pet (
    owner varchar(255)
 );
 
-create table specail_note (
+create table special_note (
    id serial primary key,
    allergic boolean,
    note text

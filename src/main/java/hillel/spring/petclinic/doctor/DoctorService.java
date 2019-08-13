@@ -8,6 +8,7 @@ import hillel.spring.petclinic.pet.PetService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -119,5 +120,28 @@ public class DoctorService {
         } else {
             schedule.getHourToPetId().put(hour, petId);
         }
+    }
+
+    @Transactional
+    public void moveSchedule(Integer fromDoctorId, Integer toDoctorId) {
+        Optional<Doctor> fromMaybeDoctor = doctorRepository.findById(fromDoctorId);
+        if (fromMaybeDoctor.isEmpty())
+            throw new NoSuchDoctorException(fromDoctorId);
+        Optional<Doctor> toMaybeDoctor = doctorRepository.findById(toDoctorId);
+        if (toMaybeDoctor.isEmpty())
+            throw new NoSuchDoctorException(toDoctorId);
+        Doctor fromDoctor = fromMaybeDoctor.get();
+        Doctor toDoctor = toMaybeDoctor.get();
+        fromDoctor.getScheduleToDate().entrySet()
+                .forEach(e-> moveSchedule(e, toDoctor));
+        doctorRepository.save(toDoctor);
+    }
+
+    private void moveSchedule(Map.Entry<LocalDate, Schedule> schedulesFrom, Doctor toDoctor){
+        Schedule scheduleTo = findOrCreateSchedule(toDoctor, schedulesFrom.getKey());
+        schedulesFrom.getValue().getHourToPetId()
+                .entrySet()
+                .forEach( e-> putToSchedule(scheduleTo, e.getKey(), e.getValue()));
+
     }
 }

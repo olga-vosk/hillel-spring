@@ -1,13 +1,12 @@
 package hillel.spring.petclinic.doctor;
 
+import hillel.spring.petclinic.TestRunner;
 import hillel.spring.petclinic.pet.Pet;
 import hillel.spring.petclinic.pet.PetRepository;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,8 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
+@TestRunner
 public class DoctorControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -358,6 +356,51 @@ public class DoctorControllerTest {
 
     }
 
+    @Test
+    public void shouldMoveSchedule() throws Exception{
+        Integer doctorIdFrom = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
+        Integer doctorIdTo = repository.save(new Doctor(2, "Petr Petrov", "veterinarian")).getId();
+        Integer petId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
+        Doctor doctorFrom = repository.findById(doctorIdFrom).get();
+        LocalDate localDate = LocalDate.of(2010, 01, 01);
+        Schedule schedule = new Schedule();
+        doctorService.putToSchedule(schedule, 10, petId);
+        doctorFrom.getScheduleToDate().put(localDate, schedule);
+        repository.save(doctorFrom);
+        
+        mockMvc.perform(post("/doctors/move-schedule/{doctorIdFrom}/{doctorIdTo}", doctorIdFrom, doctorIdTo))
+                .andExpect(status().isOk());
+        Doctor doctorTo = repository.findById(doctorIdTo).get();
+        assertThat(doctorTo.getScheduleToDate().get(localDate).getHourToPetId()
+                .equals(doctorFrom.getScheduleToDate().get(localDate).getHourToPetId())).isTrue();
+    }
+
+    @Test
+    public void shouldNotMoveSchedule() throws Exception{
+        Integer doctorIdFrom = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
+        Integer doctorIdTo = repository.save(new Doctor(1, "Petr Petrov", "veterinarian")).getId();
+        Integer petId1 = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
+        Integer petId2 = petRepository.save(new Pet(null, null,"Jerry", "Mouse", 1, "Vasya")).getId();
+        Doctor doctorFrom = repository.findById(doctorIdFrom).get();
+        LocalDate localDate = LocalDate.of(2010, 01, 01);
+
+        Schedule scheduleFrom = new Schedule();
+        doctorService.putToSchedule(scheduleFrom, 10, petId1);
+        doctorFrom.getScheduleToDate().put(localDate, scheduleFrom);
+        repository.save(doctorFrom);
+
+        Doctor doctorTo= repository.findById(doctorIdTo).get();
+        Schedule scheduleTo = new Schedule();
+        doctorService.putToSchedule(scheduleTo, 10, petId2);
+        doctorTo.getScheduleToDate().put(localDate, scheduleTo);
+        doctorTo = repository.save(doctorTo);
+        scheduleTo = doctorTo.getScheduleToDate().entrySet().iterator().next().getValue();
+
+        mockMvc.perform(post("/doctors/move-schedule/{doctorIdFrom}/{doctorIdTo}", doctorIdFrom, doctorIdTo))
+                .andExpect(status().isBadRequest());
+        doctorTo = repository.findById(doctorIdTo).get();
+        assertThat(doctorTo.getScheduleToDate().get(localDate).equals(scheduleTo)).isTrue();
+    }
 
     public String fromResource(String path) {
         try {
