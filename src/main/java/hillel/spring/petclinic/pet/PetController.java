@@ -2,29 +2,28 @@ package hillel.spring.petclinic.pet;
 
 import hillel.spring.petclinic.pet.dto.PetDtoConverter;
 import hillel.spring.petclinic.pet.dto.PetInputDto;
-import lombok.AllArgsConstructor;
 import lombok.val;
 import org.hibernate.StaleObjectStateException;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+
 
 @RestController
-
 public class PetController {
     private final PetService petService;
     private final UriComponentsBuilder uriBuilder;
 
     private final PetDtoConverter dtoConverter =
-     Mappers.getMapper(PetDtoConverter.class);
+            Mappers.getMapper(PetDtoConverter.class);
 
 
     public PetController(PetService petService,
@@ -71,7 +70,7 @@ public class PetController {
     public ResponseEntity<?> updatePet(@RequestBody PetInputDto dto,
                                        @PathVariable Integer id){
         val pet = dtoConverter.toModel(dto, id);
-        petService.update(pet);
+        petService.save(pet);
         return ResponseEntity.ok().build();
     }
 

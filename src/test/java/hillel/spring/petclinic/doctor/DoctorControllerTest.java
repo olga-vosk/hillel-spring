@@ -259,7 +259,7 @@ public class DoctorControllerTest {
     @Test
     public void shouldSchedulePet() throws Exception{
         Integer doctorId = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
-        Integer petId = petRepository.save(new Pet(null, "Tom", "Cat", 2, "Vasya")).getId();
+        Integer petId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
 
         mockMvc.perform(post("/doctors/{id}/schedule/2010-01-01/10", doctorId)
                 .contentType("application/json")
@@ -279,7 +279,7 @@ public class DoctorControllerTest {
     @Test
     public void shouldFindSchedule() throws Exception{
         Integer doctorId = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
-        Integer petId = petRepository.save(new Pet(null, "Tom", "Cat", 2, "Vasya")).getId();
+        Integer petId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
         Doctor doctor = repository.findById(doctorId).get();
         LocalDate localDate = LocalDate.of(2010, 01, 01);
         Schedule schedule = new Schedule();
@@ -294,7 +294,7 @@ public class DoctorControllerTest {
     @Test
     public void shouldNotSchedulePetWithWrongDoctor() throws Exception{
         Integer doctorId = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
-        Integer petId = petRepository.save(new Pet(null, "Tom", "Cat", 2, "Vasya")).getId();
+        Integer petId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
 
         mockMvc.perform(post("/doctors/{id}/schedule/2010-01-01/10", doctorId +100)
                 .contentType("application/json")
@@ -307,7 +307,7 @@ public class DoctorControllerTest {
     @Test
     public void shouldNotSchedulePetWithWrongPet() throws Exception{
         Integer doctorId = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
-        Integer petId = petRepository.save(new Pet(null, "Tom", "Cat", 2, "Vasya")).getId();
+        Integer petId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
 
         mockMvc.perform(post("/doctors/{id}/schedule/2010-01-01/10", doctorId )
                 .contentType("application/json")
@@ -320,7 +320,7 @@ public class DoctorControllerTest {
     @Test
     public void shouldNotSchedulePetWithWrongHour() throws Exception{
         Integer doctorId = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
-        Integer petId = petRepository.save(new Pet(null, "Tom", "Cat", 2, "Vasya")).getId();
+        Integer petId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
 
         mockMvc.perform(post("/doctors/{id}/schedule/2010-01-01/1000", doctorId )
                 .contentType("application/json")
@@ -333,8 +333,8 @@ public class DoctorControllerTest {
     @Test
     public void shouldNotSchedulePetForAlreadyBusyHour() throws Exception{
         Integer doctorId = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
-        Integer catId = petRepository.save(new Pet(null, "Tom", "Cat", 2, "Vasya")).getId();
-        Integer mouseId = petRepository.save(new Pet(null, "Jerry", "Mouse", 1, "Vasya")).getId();
+        Integer catId = petRepository.save(new Pet(null, null,"Tom", "Cat", 2, "Vasya")).getId();
+        Integer mouseId = petRepository.save(new Pet(null, null,"Jerry", "Mouse", 1, "Vasya")).getId();
 
         mockMvc.perform(post("/doctors/{id}/schedule/2010-01-01/10", doctorId)
                 .contentType("application/json")
