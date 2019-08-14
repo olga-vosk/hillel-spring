@@ -123,7 +123,7 @@ public class DoctorService {
     }
 
     @Transactional
-    public void moveSchedule(Integer fromDoctorId, Integer toDoctorId) {
+    public void moveSchedule(LocalDate date, Integer fromDoctorId, Integer toDoctorId) {
         Optional<Doctor> fromMaybeDoctor = doctorRepository.findById(fromDoctorId);
         if (fromMaybeDoctor.isEmpty())
             throw new NoSuchDoctorException(fromDoctorId);
@@ -132,16 +132,25 @@ public class DoctorService {
             throw new NoSuchDoctorException(toDoctorId);
         Doctor fromDoctor = fromMaybeDoctor.get();
         Doctor toDoctor = toMaybeDoctor.get();
-        fromDoctor.getScheduleToDate().entrySet()
-                .forEach(e-> moveSchedule(e, toDoctor));
+
+        Schedule scheduleFrom =  fromDoctor.getScheduleToDate().get(date);
+        Schedule scheduleTo = findOrCreateSchedule(toDoctor, date);
+
+        Optional<Integer> mayBeBusyHour = scheduleFrom.getHourToPetId()
+                .keySet()
+                .stream()
+                .filter(hour ->scheduleTo.getHourToPetId().containsKey(hour))
+                .findFirst();
+
+        if (mayBeBusyHour.isPresent()){
+            throw new ScheduleHourAlreadyBusy(mayBeBusyHour.get());
+        }
+
+
+        scheduleTo.getHourToPetId().putAll(scheduleFrom.getHourToPetId());
+        scheduleFrom.getHourToPetId().clear();
+
         doctorRepository.save(toDoctor);
-    }
-
-    private void moveSchedule(Map.Entry<LocalDate, Schedule> schedulesFrom, Doctor toDoctor){
-        Schedule scheduleTo = findOrCreateSchedule(toDoctor, schedulesFrom.getKey());
-        schedulesFrom.getValue().getHourToPetId()
-                .entrySet()
-                .forEach( e-> putToSchedule(scheduleTo, e.getKey(), e.getValue()));
-
+        doctorRepository.save(fromDoctor);
     }
 }

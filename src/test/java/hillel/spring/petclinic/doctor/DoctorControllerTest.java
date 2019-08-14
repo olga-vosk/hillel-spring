@@ -368,11 +368,13 @@ public class DoctorControllerTest {
         doctorFrom.getScheduleToDate().put(localDate, schedule);
         repository.save(doctorFrom);
         
-        mockMvc.perform(post("/doctors/move-schedule/{doctorIdFrom}/{doctorIdTo}", doctorIdFrom, doctorIdTo))
+        mockMvc.perform(post("/doctors/move-schedule/2010-01-01/{doctorIdFrom}/{doctorIdTo}", doctorIdFrom, doctorIdTo))
                 .andExpect(status().isOk());
         Doctor doctorTo = repository.findById(doctorIdTo).get();
         assertThat(doctorTo.getScheduleToDate().get(localDate).getHourToPetId()
                 .equals(doctorFrom.getScheduleToDate().get(localDate).getHourToPetId())).isTrue();
+        doctorFrom = repository.findById(doctorIdFrom).get();
+        assertThat(doctorFrom.getScheduleToDate().get(localDate).getHourToPetId()).isEmpty();
     }
 
     @Test
@@ -396,10 +398,11 @@ public class DoctorControllerTest {
         doctorTo = repository.save(doctorTo);
         scheduleTo = doctorTo.getScheduleToDate().entrySet().iterator().next().getValue();
 
-        mockMvc.perform(post("/doctors/move-schedule/{doctorIdFrom}/{doctorIdTo}", doctorIdFrom, doctorIdTo))
+        mockMvc.perform(post("/doctors/move-schedule/2010-01-01/{doctorIdFrom}/{doctorIdTo}", doctorIdFrom, doctorIdTo))
                 .andExpect(status().isBadRequest());
         doctorTo = repository.findById(doctorIdTo).get();
         assertThat(doctorTo.getScheduleToDate().get(localDate).equals(scheduleTo)).isTrue();
+        assertThat(doctorFrom.getScheduleToDate().get(localDate).equals(scheduleFrom)).isTrue();
     }
 
     public String fromResource(String path) {

@@ -49,10 +49,12 @@ public class DoctorController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/doctors/move-schedule/{fromDoctorId}/{toDoctorId}")
-    public ResponseEntity<?> moveSchedule(@PathVariable Integer fromDoctorId,
-                           @PathVariable Integer toDoctorId) {
-        doctorService.moveSchedule(fromDoctorId, toDoctorId);
+    @PostMapping("/doctors/move-schedule/{date}/{fromDoctorId}/{toDoctorId}")
+    public ResponseEntity<?> moveSchedule(@PathVariable
+                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                          @PathVariable Integer fromDoctorId,
+                                          @PathVariable Integer toDoctorId) {
+        doctorService.moveSchedule(date, fromDoctorId, toDoctorId);
         return ResponseEntity.ok().build();
     }
 
