@@ -11,8 +11,11 @@ import java.util.Map;
 @Entity
 public class Schedule {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Version
+    private Integer version;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private Map<Integer, Integer> hourToPetId = new HashMap<>();

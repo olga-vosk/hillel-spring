@@ -5,10 +5,12 @@ import hillel.spring.petclinic.doctor.dto.DoctorInputDto;
 import hillel.spring.petclinic.pet.NoSuchPetException;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import org.hibernate.StaleObjectStateException;
 import org.mapstruct.factory.Mappers;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,12 +39,22 @@ public class DoctorController {
     }
 
     @PostMapping("/doctors/{doctorId}/schedule/{date}/{hour}")
+    @Retryable(StaleObjectStateException.class)
     public ResponseEntity<?> schedulePetToDoctor(@PathVariable Integer doctorId,
                                                  @PathVariable
                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                                                  @PathVariable Integer hour,
                                                  @RequestBody PetId petId){
         doctorService.schedulePetToDoctor(doctorId, date, hour, petId.getPetId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/doctors/move-schedule/{date}/{fromDoctorId}/{toDoctorId}")
+    public ResponseEntity<?> moveSchedule(@PathVariable
+                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                          @PathVariable Integer fromDoctorId,
+                                          @PathVariable Integer toDoctorId) {
+        doctorService.moveSchedule(date, fromDoctorId, toDoctorId);
         return ResponseEntity.ok().build();
     }
 

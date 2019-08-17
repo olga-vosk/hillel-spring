@@ -8,6 +8,7 @@ import hillel.spring.petclinic.pet.PetService;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -119,5 +120,37 @@ public class DoctorService {
         } else {
             schedule.getHourToPetId().put(hour, petId);
         }
+    }
+
+    @Transactional
+    public void moveSchedule(LocalDate date, Integer fromDoctorId, Integer toDoctorId) {
+        Optional<Doctor> fromMaybeDoctor = doctorRepository.findById(fromDoctorId);
+        if (fromMaybeDoctor.isEmpty())
+            throw new NoSuchDoctorException(fromDoctorId);
+        Optional<Doctor> toMaybeDoctor = doctorRepository.findById(toDoctorId);
+        if (toMaybeDoctor.isEmpty())
+            throw new NoSuchDoctorException(toDoctorId);
+        Doctor fromDoctor = fromMaybeDoctor.get();
+        Doctor toDoctor = toMaybeDoctor.get();
+
+        Schedule scheduleFrom =  fromDoctor.getScheduleToDate().get(date);
+        Schedule scheduleTo = findOrCreateSchedule(toDoctor, date);
+
+        Optional<Integer> mayBeBusyHour = scheduleFrom.getHourToPetId()
+                .keySet()
+                .stream()
+                .filter(hour ->scheduleTo.getHourToPetId().containsKey(hour))
+                .findFirst();
+
+        if (mayBeBusyHour.isPresent()){
+            throw new ScheduleHourAlreadyBusy(mayBeBusyHour.get());
+        }
+
+
+        scheduleTo.getHourToPetId().putAll(scheduleFrom.getHourToPetId());
+        scheduleFrom.getHourToPetId().clear();
+
+        doctorRepository.save(toDoctor);
+        doctorRepository.save(fromDoctor);
     }
 }
