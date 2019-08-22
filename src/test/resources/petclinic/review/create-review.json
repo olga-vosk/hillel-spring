@@ -1,0 +1,11 @@
+{
+  "doctorId" : 1,
+  "medicalRecordId" : 1,
+  "serviceStars" : 1,
+  "equipmentStars" : 2,
+  "qualificationStars" : 3,
+  "treatmentResultsStars" : 4,
+  "generalStars" : 5,
+  "comment" : "some comment"
+
+}
