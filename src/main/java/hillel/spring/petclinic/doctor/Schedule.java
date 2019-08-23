@@ -3,6 +3,9 @@ package hillel.spring.petclinic.doctor;
 
 import lombok.Data;
 
+import org.springframework.data.annotation.Version;
+
+
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
