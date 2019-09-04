@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.val;
 import org.hibernate.StaleObjectStateException;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
+import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ public class DoctorController {
     private final DoctorDtoConverter dtoConverter = Mappers.getMapper(DoctorDtoConverter.class);
 
     @PostMapping("/doctors")
-    public ResponseEntity<?> createDoctor(@RequestBody DoctorInputDto dto){
+    public ResponseEntity<?> createDoctor(@Valid @RequestBody DoctorInputDto dto){
         val created = doctorService.createDoctor(dtoConverter.toModel(dto));
         return ResponseEntity.created(uriBuilder.build(created.getId())).build();
     }
@@ -73,17 +75,18 @@ public class DoctorController {
     }
 
     @GetMapping("/doctors")
-    public Collection<Doctor> findAll(@RequestParam Optional<List<String>> specialization,
-                                      @RequestParam Optional<String> name){
-        return doctorService.findAll(specialization, name);
+    public Page<Doctor> findAll(@RequestParam Optional<List<String>> specialization,
+                                @RequestParam Optional<String> name,
+                                Pageable pageable){
+        return doctorService.findAll(specialization, name, pageable);
     }
 
 
     @PutMapping("/doctors/{id}")
-    public ResponseEntity<?> updateDoctor(@RequestBody DoctorInputDto dto,
+    public ResponseEntity<?> updateDoctor(@Valid @RequestBody DoctorInputDto dto,
                                           @PathVariable Integer id){
-        val pet = dtoConverter.toModel(dto, id);
-        doctorService.update(pet);
+        val doctor = dtoConverter.toModel(dto, id);
+        doctorService.update(doctor);
         return ResponseEntity.noContent().build();
     }
 

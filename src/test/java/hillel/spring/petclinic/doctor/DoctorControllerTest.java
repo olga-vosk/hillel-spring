@@ -61,18 +61,27 @@ public class DoctorControllerTest {
     }
 
     @Test
+    public void shouldNotCreateDoctor() throws Exception{
+        mockMvc.perform(post("/doctors")
+                .contentType("application/json")
+                .content(fromResource("petclinic/doctor/empty-name-doctor.json"))
+        )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void shouldFindAllDoctors() throws Exception {
         repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian"));
         repository.save(new Doctor(2, "Petr Petrov", "surgeon"));
 
         mockMvc.perform(get("/doctors"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(fromResource("petclinic/doctor/all-doctors.json"), false))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name", is("Ivan Ivanov")))
-                .andExpect(jsonPath("$[1].name", is("Petr Petrov")))
-                .andExpect(jsonPath("$[0].id", notNullValue()))
-                .andExpect(jsonPath("$[1].id", notNullValue()));
+                //.andExpect(content().json(fromResource("petclinic/doctor/all-doctors.json"), false))
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].name", is("Ivan Ivanov")))
+                .andExpect(jsonPath("$.content[1].name", is("Petr Petrov")))
+                .andExpect(jsonPath("$.content[0].id", notNullValue()))
+                .andExpect(jsonPath("$.content[1].id", notNullValue()));
     }
 
 
@@ -105,9 +114,9 @@ public class DoctorControllerTest {
         mockMvc.perform(get("/doctors")
                 .param("specialization", "surgeon"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].specialization[0]", is("surgeon")))
-                .andExpect(jsonPath("$[1].specialization[0]", is("surgeon")));
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].specialization[0]", is("surgeon")))
+                .andExpect(jsonPath("$.content[1].specialization[0]", is("surgeon")));
 
     }
 
@@ -121,9 +130,9 @@ public class DoctorControllerTest {
         mockMvc.perform(get("/doctors")
                 .param("name", "Petr"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name", startsWith("Petr")))
-                .andExpect(jsonPath("$[1].name", startsWith(("Petr"))));
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].name", startsWith("Petr")))
+                .andExpect(jsonPath("$.content[1].name", startsWith(("Petr"))));
 
     }
 
@@ -138,9 +147,9 @@ public class DoctorControllerTest {
                 .param("specialization", "surgeon")
                 .param("name", "Petr"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("Petr Petrov")))
-                .andExpect(jsonPath("$[0].specialization[0]", is("surgeon")));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is("Petr Petrov")))
+                .andExpect(jsonPath("$.content[0].specialization[0]", is("surgeon")));
     }
 
     @Test
@@ -153,6 +162,17 @@ public class DoctorControllerTest {
                         .andExpect(status().isNoContent());
 
         assertThat(repository.findById(id).get().getName()).isEqualTo("Petr Petrov");
+    }
+
+    @Test
+    public void shouldNotUpdateDoctor() throws Exception{
+        Integer id = repository.save(new Doctor(1, "Ivan Ivanov", "veterinarian")).getId();
+
+        mockMvc.perform(put("/doctors/{id}", id)
+                .contentType("application/json")
+                .content(fromResource("petclinic/doctor/update-empty-name-doctor.json")))
+                .andExpect(status().isBadRequest());
+
     }
 
     @Test
@@ -213,7 +233,7 @@ public class DoctorControllerTest {
         mockMvc.perform(get("/doctors")
                 .param("name", "PETR"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.content", hasSize(2)));
     }
 
     @Test
@@ -227,9 +247,9 @@ public class DoctorControllerTest {
                 .param("name", "PETR")
                 .param("specialization", "surgeon"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("Petr Petrov")))
-                .andExpect(jsonPath("$[0].specialization[0]", is("surgeon")));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is("Petr Petrov")))
+                .andExpect(jsonPath("$.content[0].specialization[0]", is("surgeon")));
     }
 
     @Test
@@ -242,15 +262,15 @@ public class DoctorControllerTest {
         mockMvc.perform(get("/doctors")
                 .param("specialization", "surgeon", "veterinarian"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$.content", hasSize(3)));
 
         mockMvc.perform(get("/doctors")
                 .param("specialization", "surgeon", "veterinarian")
                 .param("name", "i"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("Ivan Ivanov")))
-                .andExpect(jsonPath("$[0].specialization[0]", is("veterinarian")));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is("Ivan Ivanov")))
+                .andExpect(jsonPath("$.content[0].specialization[0]", is("veterinarian")));
 
     }
 
