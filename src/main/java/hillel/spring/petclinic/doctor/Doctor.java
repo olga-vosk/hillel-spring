@@ -23,6 +23,11 @@ public class Doctor {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Map<LocalDate, Schedule> scheduleToDate;
 
+    private String diplomaNumber;
+    
+    @Embedded
+    private Diploma diploma;
+
     public Doctor(Integer id, String name, List<String> specialization) {
         this.id = id;
         this.name = name;

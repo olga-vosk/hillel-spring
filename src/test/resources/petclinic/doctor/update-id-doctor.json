@@ -1,5 +1,6 @@
 {
   "id": 3000,
   "name": "Petr Petrov",
-  "specialization": ["surgeon"]
+  "specialization": ["surgeon"],
+  "diplomaNumber" : "12388787"
 }

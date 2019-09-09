@@ -6,6 +6,8 @@ pet-clinic:
       start:  8AM
       end: 5PM
   doctors-specializations:  surgeon, veterinarian, therapeutist
+  doctor-url:  "http://localhost:8081"
+  diploma-url: "http://localhost:8081"
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver

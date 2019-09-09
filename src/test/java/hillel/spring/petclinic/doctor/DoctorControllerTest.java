@@ -1,28 +1,35 @@
 package hillel.spring.petclinic.doctor;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import hillel.spring.petclinic.TestRunner;
 import hillel.spring.petclinic.pet.Pet;
 import hillel.spring.petclinic.pet.PetRepository;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.util.Optional;
 
 
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 
 @RunWith(SpringRunner.class)
 @TestRunner
@@ -39,6 +46,9 @@ public class DoctorControllerTest {
     @Autowired
     DoctorService doctorService;
 
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(8089);
+
     @After
     public void cleanup() {
         repository.deleteAll();
@@ -46,7 +56,10 @@ public class DoctorControllerTest {
 
     @Test
     public void shouldCreateDoctor() throws Exception{
-        MockHttpServletResponse response = mockMvc.perform(post("/doctors")
+        WireMock.stubFor(WireMock.get("/diploma/12345678")
+                .willReturn(okJson(fromResource("petclinic/doctor/diploma.json"))));
+
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/doctors")
                 .contentType("application/json")
                 .content(fromResource("petclinic/doctor/create-doctor.json"))
         )
@@ -57,7 +70,9 @@ public class DoctorControllerTest {
         Integer id = Integer.parseInt(response.getHeader("location")
                 .replace("http://localhost/doctors/", ""));
 
-        assertThat(repository.findById(id)).isPresent();
+        Optional<Doctor> optionalDoctor = repository.findById(id);
+        assertThat(optionalDoctor).isPresent();
+        assertThat(optionalDoctor.get().getDiploma().getGraduationYear()).isEqualTo(2001);
     }
 
     @Test
