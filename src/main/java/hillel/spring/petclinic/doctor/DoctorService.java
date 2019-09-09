@@ -25,7 +25,8 @@ public class DoctorService {
         this.petService = petService;
     }
 
-    public Doctor createDoctor(Doctor doctor) {
+    public Doctor createDoctor(Doctor doctor, Diploma diploma) {
+        doctor.setDiploma(diploma);
         return doctorRepository.save(doctor);
     }
 

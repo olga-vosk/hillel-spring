@@ -2,8 +2,10 @@ package hillel.spring.petclinic.doctor;
 
 import hillel.spring.petclinic.doctor.dto.DoctorDtoConverter;
 import hillel.spring.petclinic.doctor.dto.DoctorInputDto;
+import hillel.spring.petclinic.info.DoctorServiceConfig;
 import hillel.spring.petclinic.pet.NoSuchPetException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.hibernate.StaleObjectStateException;
 import org.mapstruct.factory.Mappers;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
@@ -25,6 +28,7 @@ import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
 public class DoctorController {
     private final DoctorService doctorService;
     private final UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance()
@@ -34,10 +38,24 @@ public class DoctorController {
 
     private final DoctorDtoConverter dtoConverter = Mappers.getMapper(DoctorDtoConverter.class);
 
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private final DoctorServiceConfig doctorServiceConfig ;
+
+
     @PostMapping("/doctors")
     public ResponseEntity<?> createDoctor(@Valid @RequestBody DoctorInputDto dto){
-        val created = doctorService.createDoctor(dtoConverter.toModel(dto));
-        return ResponseEntity.created(uriBuilder.build(created.getId())).build();
+        try {
+            log.info("Calling diploma service");
+            String url = doctorServiceConfig.getDiplomaUrl() + "/diploma/" + dto.getDiplomaNumber();
+            log.debug("Dimploma service URL: {}", url);
+            Diploma diploma = restTemplate.getForObject(url, Diploma.class);
+            val created = doctorService.createDoctor(dtoConverter.toModel(dto), diploma);
+            return ResponseEntity.created(uriBuilder.build(created.getId())).build();
+        } catch (Exception e) {
+            log.error("Call  to diploma service finished with exception", e);
+        }
+        return null;
     }
 
     @PostMapping("/doctors/{doctorId}/schedule/{date}/{hour}")
@@ -122,3 +140,4 @@ public class DoctorController {
     }
 
 }
+
