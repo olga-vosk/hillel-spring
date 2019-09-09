@@ -1,6 +1,8 @@
 package hillel.spring.petclinic.doctor;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,12 +13,14 @@ import java.util.List;
 public interface DoctorRepository extends JpaRepository<Doctor, Integer> {
 
 
-    List<Doctor> findBySpecializationInAndNameIgnoreCaseStartingWith(List<String> specialization, String name);
+    Page<Doctor> findBySpecializationInAndNameIgnoreCaseStartingWith(List<String> specialization,
+                                                                     String name,
+                                                                     Pageable pageable);
 
 
-    List<Doctor> findBySpecializationIn(List<String> specialization);
+    Page<Doctor> findBySpecializationIn(List<String> specialization, Pageable pageable);
 
 
-    List<Doctor> findByNameIgnoreCaseStartingWith(String name);
+    Page<Doctor> findByNameIgnoreCaseStartingWith(String name, Pageable pageable);
 
 }
